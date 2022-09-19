@@ -1,0 +1,8 @@
+$("#new_page_total_price").text("<%= @total_price %>")
+$("#total_price_field").val(<%= @total_price %>)
+
+if (<%= @total_price %> <= $("#bill_cash_paid_by_customer").val()) {
+    $("#generate_bill_btn").prop('disabled', false);
+} else {
+    $("#generate_bill_btn").prop('disabled', true);
+}

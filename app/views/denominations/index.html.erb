@@ -1,0 +1,36 @@
+<br>
+<div class="row g-3">
+  <div class="col-md-3">
+    <h4>Denominations</h4>
+    <%= form_with(url: "/denominations/update", method: "patch") do |f| %>
+      <% @denominations.each do |denomination| %>
+        <%= denomination.amount %><%= f.number_field :"denomination_#{denomination.amount}", value: denomination.count %>
+        <%= link_to "Remove", denomination, method: :delete %>
+        <br><br>
+      <% end %>
+      <%= f.submit %>
+    <% end %>
+  </div>
+  <div class="col-md-2"></div>
+  <div class="col-md-4">
+    <h4>Add Denominations</h4>
+    <%= form_with(model: Denomination.new) do |form| %>
+      Amount<br>
+      <%= form.number_field :amount %>
+      <%= form.submit %>
+    <% end %>
+
+
+    <br><br>
+    <b>Total Amount:</b>
+    <% total_amount = 0 %>
+    <% @denominations.each do |denomination| %>
+      <% total_amount += denomination.count.to_i * denomination.amount.to_i %>
+    <% end %>
+    <%= total_amount %>
+  </div>
+
+</div>
+
+
+<%= link_to "Bills Page", bills_path %>

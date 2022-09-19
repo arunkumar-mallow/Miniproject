@@ -1,0 +1,47 @@
+<div style="background-color: #F0F8FF" id="bill_form">
+  <br><br>
+  <div class="container" style="background-color: white">
+    <h4>Billing System</h4>
+
+    <%= form_with(url: "/bills", method: "get") do |form| %>
+      <%= form.search_field :email_id, placeholder: "Customer Email", value: params[:email_id] %>
+      <%= form.date_field :from_date, value: params[:from_date] %>
+      <%= form.date_field :to_date, value: params[:to_date] %>
+      <%= form.submit "Search", class: "btn btn-sm btn-secondary" %>
+      <% if params[:email_id] and params[:email_id] != "" or params[:from_date] and params[:to_date] %>
+        <%= link_to "Show all", bills_path, class: "btn btn-sm btn-secondary" %>
+      <% end %>
+      <%= link_to "Products", products_path, class: "btn btn-sm btn-secondary" %>
+      <%= link_to "Generate Bill", new_bill_path, class: "btn btn-sm btn-secondary" %>
+      <%= link_to "Denomination", denominations_path, class: "btn btn-sm btn-secondary" %>
+    <% end %>
+    <br>
+
+    <table class="table table-hover">
+      <thead class="table-dark table-active">
+      <tr>
+        <th></th>
+        <th>Customer Email</th>
+        <th>Purchased Date</th>
+        <th>Total Price</th>
+        <th>Purchased Product count</th>
+        <th colspan="3"></th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <% @bills.each do |bill| %>
+        <tr>
+          <td><%= bill.id %></td>
+          <td><%= bill.customer_email %></td>
+          <td><%= bill.created_at %></td>
+          <td><%= bill.total_price %></td>
+          <td><%= bill.sold_products.size %></td>
+          <td><%= link_to 'Show', bill %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </div>
+  <br>
+</div>

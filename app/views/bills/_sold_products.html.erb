@@ -1,0 +1,6 @@
+<fieldset>
+  <%= form.collection_select :product_id, Product.all, :id, :name %>
+  <%= form.number_field :quantity, placeholder: "Quantity", style: "background-color: #F0F8FF; border: none;", class: "number_field", required: true %>
+  <button id="billing_section_form_delete_btn" class="btn btn-danger">Delete</button>
+  <br><br>
+</fieldset>

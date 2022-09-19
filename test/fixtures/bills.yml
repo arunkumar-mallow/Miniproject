@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  customer_email: MyString
+  cash_paid_by_customer: MyString
+  denominations_500: 1
+
+two:
+  customer_email: MyString
+  cash_paid_by_customer: MyString
+  denominations_500: 1

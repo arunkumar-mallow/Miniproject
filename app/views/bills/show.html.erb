@@ -1,0 +1,166 @@
+<div style="background-color: #F0F8FF" id="bill_form">
+  <br><br>
+  <div class="container" style="background-color: white">
+    <h4>Billing System</h4>
+    <br>
+    <b>Customer Email</b><br>
+    <%= @bill.customer_email %>
+    <br><br>
+    <h4>Bill Section</h4>
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Product ID</th>
+        <th>Unit Price</th>
+        <th>Quantity</th>
+        <th>Purchased Prize</th>
+        <th>Tax % for item</th>
+        <th>Tax payable for item</th>
+        <th>Total prize of the item</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% total_price = 0 %>
+      <% total_tax = 0 %>
+      <% @sold_products.each do |sold_product| %>
+        <tr>
+          <td><%= sold_product.product_id %></td>
+          <td><%= sold_product.actual_price %></td>
+          <td><%= sold_product.quantity %></td>
+          <td><%= sold_product.purchased_price %></td>
+          <td><%= sold_product.actual_tax %></td>
+          <td><%= sold_product.purchased_tax %></td>
+          <td><%= sold_product.total_price %></td>
+        </tr>
+
+        <% total_price += sold_product.purchased_price.to_i %>
+        <% total_tax += sold_product.purchased_tax.to_i %>
+
+      <% end %>
+      </tbody>
+    </table>
+
+    <br><br>
+    <h4>Balance Denomination's</h4>
+    <br>
+
+    <% bills_denomination = {} %>
+    <% @bill.bill_denomination.each { |denomination| bills_denomination[denomination.amount.to_i] = denomination.count.to_i } %>
+    <div class="row g-3">
+      <div class="col-md-2">
+        <b style="font-size: 15px">Before bill generate</b>
+        <table>
+          <tbody>
+          <% bills_denomination.each do |amount, count| %>
+            <tr>
+              <td style="padding-right: 20px"><%= amount %></td>
+              <td style="background-color: #F0F8FF; border: none; width: 150px;"> <%= count %><br>
+              </td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+
+        Total price: <%= denominations_price(bills_denomination) %>
+      </div>
+      <div class="col-md-1"></div>
+      <div class="col-md-2">
+        <b style="font-size: 15px">After bill generate</b>
+        <% after_bill_generate = denominations_return((total_price + total_tax).round(2), @bill.cash_paid_by_customer.to_i, bills_denomination, denominations_string_to_hash(@bill.manual_denominations)) %>
+        <table>
+          <tbody>
+          <% after_bill_generate.each do |amount, count| %>
+            <% next if amount == "remaining_amount" %>
+            <tr>
+              <td style="padding-right: 20px"><%= amount %></td>
+              <td style="background-color: #F0F8FF; border: none; width: 150px;"> <%= count %><br></td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+        Total price: <%= denominations_price(after_bill_generate) %>
+      </div>
+
+      <div class="col-md-1"></div>
+
+      <div class="col-md-2">
+        <b style="font-size: 15px">Changes </b>
+        <% different = domination_diff(after_bill_generate, bills_denomination) %>
+        <table>
+          <tbody>
+          <% different.each do |amount, count| %>
+            <% next if amount == "remaining_amount" %>
+            <tr>
+              <td style="padding-right: 20px"><%= amount %></td>
+              <td style="background-color: #F0F8FF; border: none; width: 150px;"> <%= count %><br></td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+
+      </div>
+
+      <div class="col-md-1"></div>
+
+      <div class="col-md-2 btn btn-sm" id="remaining_update_btn">Update Denominations</div>
+      <div class="col-md-2" id="remaining_update">
+
+        You dont have amount: <%= after_bill_generate["remaining_amount"] %>
+        <% denominations = Denomination.order("amount DESC") %>
+        <%= form_with(url: "/denominations/update", method: "patch") do |f| %>
+          <table>
+            <tbody>
+            <% denominations.each do |denomination| %>
+              <tr>
+                <td style="padding-right: 20px"><%= denomination.amount %></td>
+                <td> <%= f.number_field :"d#{denomination.amount}", style: "background-color: #F0F8FF; border: none; width: 150px;", value: denomination.count %>
+                  <br>
+                </td>
+              </tr>
+            <% end %>
+            </tbody>
+          </table>
+
+          <%= f.submit "Update Denomination", class: "btn btn-sm" %>
+        <% end %>
+      </div>
+
+
+    </div>
+
+    <div style="background-color: #f0f0f0; text-align: right;">
+      <b>
+        Total price without tax: <%= total_price %><br>
+        Total tax playable: <%= total_tax %><br>
+        Net price of the purchased item: <%= total_price + total_tax %><br>
+        Rounded down value of the purchased items net price: <%= (total_price + total_tax).round(2) %><br>
+        Balance payable to the customer: <%= @bill.cash_paid_by_customer.to_i - (total_price + total_tax).round(2) %>
+        <br>
+      </b>
+    </div>
+
+    <%= link_to "Generate new Bill", new_bill_path, class: "btn btn-secondary" %>
+    <%= link_to "Back", bills_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<script>
+    function remaining_update() {
+        let remaining_amount =
+        <%= after_bill_generate["remaining_amount"].to_i %>
+
+        if (remaining_amount > 0) {
+            $("#remaining_update_btn").css("display", "none")
+            alert("You dont have enough amount")
+        } else {
+            $("#remaining_update").css("display", "none")
+        }
+    }
+
+    remaining_update()
+
+    $("#remaining_update_btn").click(function () {
+        $("#remaining_update_btn").css("display", "none");
+        $("#remaining_update").css("display", "");
+    })
+</script>

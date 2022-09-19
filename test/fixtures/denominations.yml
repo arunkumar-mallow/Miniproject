@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  d500: MyString
+  d100: MyString
+  d50: MyString
+  d20: MyString
+  d10: MyString
+  d1: MyString
+
+two:
+  d500: MyString
+  d100: MyString
+  d50: MyString
+  d20: MyString
+  d10: MyString
+  d1: MyString

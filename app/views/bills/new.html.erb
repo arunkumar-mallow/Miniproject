@@ -1,0 +1,124 @@
+<% if @bill.errors.any? %>
+  <div style="color: red">
+    <h2><%= pluralize(@bill.errors.count, "error") %> prohibited this bill from being saved:</h2>
+
+    <ul>
+      <% @bill.errors.each do |error| %>
+        <li><%= error.full_message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+<div style="background-color: #F0F8FF">
+  <br><br>
+  <%= form_for @bill do |form| %>
+    <div class="container" style="background-color: white">
+      <h4>Billing System</h4>
+      <br>
+      <b>Customer Email</b>&nbsp;&nbsp;
+      <%= form.email_field :customer_email, placeholder: "Enter Email Address", style: "background-color: #F0F8FF; border: none;", required: true %>
+
+      <br>
+      <hr>
+
+      <strong>Bill Section</strong>
+      <%= link_to_add_row("Add New", form, :sold_products, class: "btn btn-primary") %>
+      <br>
+      <br>
+
+      <div class="fields">
+        <%= form.fields_for :sold_products do |builder| %>
+          <%= render 'sold_products', form: builder %>
+        <% end %>
+      </div>
+      <br>
+
+      <hr>
+      <br>
+
+      <% @denominations = Denomination.order("amount DESC") %>
+
+      <div class="row g-3">
+        <div class="col-md-5">
+          <strong>Denominations</strong>
+          <br><br>
+          <table class="table-hide">
+            <tbody>
+            <% @denominations.each do |denomination| %>
+              <tr>
+                <td style="padding-right: 10px"><b><%= denomination.amount %></b></td>
+                <td style="background-color: #F0F8FF; border: none; width: 150px; padding-left: 10px"><%= denomination.count %> </td>
+              </tr>
+            <% end %>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-5">
+          Add manually
+          <br><br>
+
+          <table class="table-hide manual_denominations">
+            <tbody>
+            <% @denominations.each do |denomination| %>
+              <tr>
+                <td style="padding-right: 10px"><b><%= denomination.amount %></b></td>
+                <td><%= form.number_field :"md#{denomination.amount}", style: "background-color: #F0F8FF; border: none; width: 150px; padding-left: 10px", value: 0, class: "manual_denomination_field" %> </td>
+              </tr>
+            <% end %>
+            </tbody>
+          </table>
+
+        </div>
+        <br>
+        <br>
+      </div>
+
+      <br>
+      <div class="container">
+        Total Price =
+        <span id="new_page_total_price">0</span><br><%= form.hidden_field :total_price, value: 0, id: "total_price_field" %>
+        Cash Paid by Customer <%= form.number_field :cash_paid_by_customer, required: true %>
+
+        <%= link_to "Cancel", bills_path, class: "btn btn-secondary" %>
+        <%= form.submit "Generate Bill", class: "btn btn-secondary", id: "generate_bill_btn" %>
+      </div>
+    </div>
+
+  <% end %>
+  <br>
+</div>
+
+<script>
+
+    $(".fields").on('keyup', '.number_field', function () {
+        $.ajax({
+            url: "/bills/get_price",
+            type: "post",
+            data: $("#new_bill").serialize()
+
+        })
+    })
+
+    $(".manual_denominations").on('keyup', '.manual_denomination_field', function () {
+        $.ajax({
+            url: "/bills/manual_denominations",
+            type: "post",
+            data: $("#new_bill").serialize()
+        })
+    })
+
+    $("#generate_bill_btn").prop('disabled', true);
+    $("#bill_cash_paid_by_customer").on('keyup', function () {
+        let total_price = parseInt(document.getElementById("new_page_total_price").innerText)
+        let given_amount = $("#bill_cash_paid_by_customer").val()
+
+        if (total_price <= given_amount) {
+            $("#generate_bill_btn").prop('disabled', false);
+        } else {
+            $("#generate_bill_btn").prop('disabled', true);
+        }
+
+    })
+
+
+</script>
